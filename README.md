@@ -112,13 +112,13 @@ outputs/Stream-Clip-Analyzer-v1.3.2-mac.zip
 
 ## GitHubからリリース
 
-`.github/workflows/release.yml` を含む状態でGitHubへ反映すると、GitHub Actionsから配布版を作成できます。
+`.github/workflows/release.yml` を含む状態でGitHubへ反映すると、新しいアプリ内バージョンが `main` に入った時点でGitHub Actionsが配布版を自動作成します。すでに同じバージョンのReleaseがある場合は、重複公開せずビルドをスキップします。
 
 1. GitHubの「Actions」を開きます。
 2. 「Build and release macOS app」を選びます。
 3. 「Run workflow」を実行します。
 
-テスト、macOSアプリのビルド、VADモデルの存在確認、ad-hoc署名、GitHub Releaseの作成、配布ZIPの添付まで自動実行されます。`v1.3.2` のようなバージョンタグをpushした場合も同じ処理が動きます。タグとアプリ内バージョンが一致しない場合は、誤った版を公開しないよう処理を停止します。
+手動実行、新しいバージョンを含む `main` へのpush、または `v1.3.2` のようなバージョンタグのpushで起動します。テスト、macOSアプリのビルド、VADモデルの存在確認、ad-hoc署名、GitHub Release作成、配布ZIPと `update.json` の添付、`main` の更新情報反映まで自動実行されます。タグとアプリ内バージョンが一致しない場合は、誤った版を公開しないよう処理を停止します。
 
 ## アップデート
 
