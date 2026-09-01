@@ -16,13 +16,33 @@ ProgressCallback = Callable[[str], None]
 
 
 def _bundled_binary(name: str) -> str | None:
-    roots = [Path(getattr(sys, "_MEIPASS", "")), Path(sys.executable).resolve().parent]
+    if not getattr(sys, "frozen", False):
+        return None
+
+    roots: list[Path] = []
+    bundle_root = getattr(sys, "_MEIPASS", None)
+    if bundle_root:
+        roots.append(Path(bundle_root).resolve())
+    executable = Path(sys.executable).resolve()
+    roots.append(executable.parent)
+
+    seen: set[Path] = set()
     for root in roots:
-        if not str(root):
-            continue
-        for candidate in (root / name, root / "bin" / name, root.parent / "Resources" / "bin" / name):
-            if candidate.is_file():
-                return str(candidate)
+        candidates = (
+            root / "bin" / name,
+            root / name,
+            root.parent / "Frameworks" / "bin" / name,
+            root.parent / "Resources" / "bin" / name,
+        )
+        for candidate in candidates:
+            resolved = candidate.resolve()
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            if resolved == executable:
+                continue
+            if resolved.name == name and resolved.is_file() and os.access(resolved, os.X_OK):
+                return str(resolved)
     return None
 
 

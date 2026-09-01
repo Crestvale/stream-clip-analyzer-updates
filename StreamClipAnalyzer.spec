@@ -42,10 +42,10 @@ app = BUNDLE(
     name="Stream Clip Analyzer.app",
     icon=None,
     bundle_identifier="com.crestvale.stream-clip-analyzer",
-    version="1.3.2",
+    version="1.3.3",
     info_plist={
-        "CFBundleShortVersionString": "1.3.2",
-        "CFBundleVersion": "1.3.2",
+        "CFBundleShortVersionString": "1.3.3",
+        "CFBundleVersion": "1.3.3",
         "NSHighResolutionCapable": True,
         "NSRequiresAquaSystemAppearance": False,
     },

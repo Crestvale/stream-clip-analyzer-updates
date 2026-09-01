@@ -1,8 +1,10 @@
-# Stream Clip Analyzer v1.3.2
+# Stream Clip Analyzer v1.3.3
 
 配信動画・音声をWhisperで文字起こしし、人が選んだ範囲をFFmpegで切り抜くmacOS向けデスクトップアプリです。v1.3では、正式な書き出し前に候補ごとの動画をアプリ内で確認し、確定済みの候補だけを書き出せます。
 
 v1.3.2では、faster-whisperが音声区間検出に使う `assets/silero_vad_v6.onnx` をmacOSアプリへ確実に同梱するようビルドを修正しました。従来機能とv1.3.1のUIスレッド修正は維持されています。
+
+v1.3.3では、動画読み込み時の `ffprobe` 探索を厳格化し、誤ってアプリ本体を外部コマンドとして起動する可能性を排除しました。ビルド後には、同梱した `ffmpeg` と `ffprobe` が実際に実行できることも自動検証します。
 
 ## v1.3の主な追加機能
 
@@ -105,7 +107,7 @@ chmod +x build_mac.sh
 
 ```text
 dist/Stream Clip Analyzer.app
-outputs/Stream-Clip-Analyzer-v1.3.2-mac.zip
+outputs/Stream-Clip-Analyzer-v1.3.3-mac.zip
 ```
 
 `build_mac.sh` は利用中の `ffmpeg` と `ffprobe` に加え、`faster_whisper/assets` ディレクトリ全体をアプリへ同梱します。ビルド後に `.app/Contents/Frameworks/faster_whisper/assets/silero_vad_v6.onnx` の存在を自動確認し、欠落していればZIPを生成せず終了します。その後、身内配布向けのad-hoc署名を行います。Apple Developer ID署名・公証は行いません。別Macで初回起動が止められた場合は、「システム設定 → プライバシーとセキュリティ → このまま開く」から許可してください。
@@ -118,7 +120,7 @@ outputs/Stream-Clip-Analyzer-v1.3.2-mac.zip
 2. 「Build and release macOS app」を選びます。
 3. 「Run workflow」を実行します。
 
-手動実行、新しいバージョンを含む `main` へのpush、または `v1.3.2` のようなバージョンタグのpushで起動します。テスト、macOSアプリのビルド、VADモデルの存在確認、ad-hoc署名、GitHub Release作成、配布ZIPと `update.json` の添付、`main` の更新情報反映まで自動実行されます。タグとアプリ内バージョンが一致しない場合は、誤った版を公開しないよう処理を停止します。
+手動実行、新しいバージョンを含む `main` へのpush、または `v1.3.3` のようなバージョンタグのpushで起動します。テスト、macOSアプリのビルド、VADモデルの存在確認、ad-hoc署名、GitHub Release作成、配布ZIPと `update.json` の添付、`main` の更新情報反映まで自動実行されます。タグとアプリ内バージョンが一致しない場合は、誤った版を公開しないよう処理を停止します。
 
 ## アップデート
 
@@ -128,8 +130,8 @@ outputs/Stream-Clip-Analyzer-v1.3.2-mac.zip
 
 ```json
 {
-  "version": "1.3.2",
-  "download_url": "https://example.com/Stream-Clip-Analyzer-v1.3.2-mac.zip",
+  "version": "1.3.3",
+  "download_url": "https://example.com/Stream-Clip-Analyzer-v1.3.3-mac.zip",
   "sha256": "ZIPのSHA-256",
   "notes": ["変更内容"]
 }
