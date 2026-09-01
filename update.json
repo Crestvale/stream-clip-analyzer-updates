@@ -1,11 +1,12 @@
 {
-  "version": "1.3.0",
-  "download_url": "https://github.com/Crestvale/stream-clip-analyzer-updates/releases/download/v1.3.0/Stream-Clip-Analyzer-v1.3.0-mac.zip",
-  "sha256": "7242ddc18a3f45312b8a4302dab89a314f0c6cad7a693b036369b06e7b519717",
+  "version": "1.3.1",
+  "download_url": "https://github.com/Crestvale/stream-clip-analyzer-updates/releases/download/v1.3.1/Stream-Clip-Analyzer-v1.3.1-mac.zip",
+  "sha256": "9c2251b0841198a9dcdd8863acc636f0e2819b4648ac2eeeb3b07bf2f0d83a76",
   "notes": [
     "候補ごとのアプリ内動画プレビューを追加",
     "再生・一時停止・シークに対応",
     "開始・終了位置の±0.5秒・±1秒調整に対応",
-    "確定済み候補だけの個別・結合出力に対応"
+    "確定済み候補だけの個別・結合出力に対応",
+    "アップデート確認時にmacOSで強制終了する問題を修正"
   ]
 }
