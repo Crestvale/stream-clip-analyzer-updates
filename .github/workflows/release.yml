@@ -1,0 +1,103 @@
+name: Build and release macOS app
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install FFmpeg and Python dependencies
+        run: |
+          brew install ffmpeg
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run non-GUI tests
+        run: |
+          python -m unittest -v \
+            tests.test_build_support \
+            tests.test_media \
+            tests.test_models \
+            tests.test_timecode \
+            tests.test_transcription \
+            tests.test_updater
+
+      - name: Build, sign, and verify app
+        run: ./build_mac.sh
+
+      - name: Determine release tag
+        id: release
+        shell: bash
+        run: |
+          version=$(python -c 'from stream_clip_analyzer import __version__; print(__version__)')
+          if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            tag="v$version"
+          fi
+          if [[ "$tag" != "v$version" ]]; then
+            echo "Tag $tag does not match application version v$version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          archive="outputs/Stream-Clip-Analyzer-v${VERSION}-mac.zip"
+          test -f "$archive"
+          checksum=$(shasum -a 256 "$archive" | awk '{print $1}')
+          download_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/$(basename "$archive")"
+          jq -n \
+            --arg version "$VERSION" \
+            --arg download_url "$download_url" \
+            --arg sha256 "$checksum" \
+            '{
+              version: $version,
+              download_url: $download_url,
+              sha256: $sha256,
+              notes: [
+                "faster-whisperのVADモデルをmacOSアプリへ確実に同梱",
+                "VADモデルのビルド後検証を追加",
+                "既存のプレビュー・編集・書き出し機能を維持"
+              ]
+            }' > update.json
+          gh release create "$RELEASE_TAG" "$archive" update.json \
+            --title "Stream Clip Analyzer v${VERSION}" \
+            --generate-notes
+
+      - name: Publish update metadata
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          cp update.json "$RUNNER_TEMP/update.json"
+          git fetch origin main
+          git checkout -B release-metadata origin/main
+          cp "$RUNNER_TEMP/update.json" update.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add update.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update release metadata for v${VERSION}"
+            git push origin HEAD:main
+          fi
