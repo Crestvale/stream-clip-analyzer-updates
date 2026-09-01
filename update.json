@@ -1,7 +1,7 @@
 {
-  "version": "1.3.2",
-  "download_url": "https://github.com/Crestvale/stream-clip-analyzer-updates/releases/download/v1.3.2/Stream-Clip-Analyzer-v1.3.2-mac.zip",
-  "sha256": "ef0db744f42a1e6de730fea9e7a83dadc57fbd3d2b0525259d1d9b9c64e91347",
+  "version": "1.3.3",
+  "download_url": "https://github.com/Crestvale/stream-clip-analyzer-updates/releases/download/v1.3.3/Stream-Clip-Analyzer-v1.3.3-mac.zip",
+  "sha256": "e79130e42c260dec01ece5dd587e175d4e4ceb58c3d95c38b6bf2f273562dfac",
   "notes": [
     "faster-whisperのVADモデルをmacOSアプリへ確実に同梱",
     "VADモデルのビルド後検証を追加",
