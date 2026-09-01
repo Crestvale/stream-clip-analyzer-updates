@@ -3,6 +3,8 @@ name: Build and release macOS app
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
       - "v*"
 
@@ -22,25 +24,6 @@ jobs:
           python-version: "3.13"
           cache: pip
 
-      - name: Install FFmpeg and Python dependencies
-        run: |
-          brew install ffmpeg
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-
-      - name: Run non-GUI tests
-        run: |
-          python -m unittest -v \
-            tests.test_build_support \
-            tests.test_media \
-            tests.test_models \
-            tests.test_timecode \
-            tests.test_transcription \
-            tests.test_updater
-
-      - name: Build, sign, and verify app
-        run: ./build_mac.sh
-
       - name: Determine release tag
         id: release
         shell: bash
@@ -58,7 +41,43 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
+      - name: Check whether this version is already released
+        id: existing_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "$RELEASE_TAG is already published; skipping the build."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install FFmpeg and Python dependencies
+        if: steps.existing_release.outputs.skip != 'true'
+        run: |
+          brew install ffmpeg
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run non-GUI tests
+        if: steps.existing_release.outputs.skip != 'true'
+        run: |
+          python -m unittest -v \
+            tests.test_build_support \
+            tests.test_media \
+            tests.test_models \
+            tests.test_timecode \
+            tests.test_transcription \
+            tests.test_updater
+
+      - name: Build, sign, and verify app
+        if: steps.existing_release.outputs.skip != 'true'
+        run: ./build_mac.sh
+
       - name: Publish GitHub Release
+        if: steps.existing_release.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
@@ -87,6 +106,7 @@ jobs:
             --generate-notes
 
       - name: Publish update metadata
+        if: steps.existing_release.outputs.skip != 'true'
         env:
           VERSION: ${{ steps.release.outputs.version }}
         run: |
